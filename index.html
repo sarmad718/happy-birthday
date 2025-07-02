@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Birthday Countdown Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to top right, #ff9a9e, #fad0c4);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      text-align: center;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-top: 1em;
+      text-shadow: 2px 2px #ff69b4;
+    }
+
+    #countdown {
+      font-size: 2em;
+      margin: 1em auto;
+      display: inline-block;
+      padding: 20px 40px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 20px rgba(255, 105, 180, 0.3);
+    }
+
+    #countdown span {
+      display: inline-block;
+      min-width: 60px;
+      font-size: 2em;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .balloon {
+      position: absolute;
+      bottom: -100px;
+      width: 60px;
+      height: 80px;
+      background-color: #ff6f91;
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-120vh); }
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="mainHeading">🎉 Countdown to Dure Janu's Day 🎉</h1>
+  <div id="countdown">Loading...</div>
+  <canvas id="fireworks"></canvas>
+
+  <script>
+    const countdownEl = document.getElementById("countdown");
+    const headingEl = document.getElementById("mainHeading");
+    const canvas = document.getElementById("fireworks");
+    const ctx = canvas.getContext("2d");
+
+    // 🎯 Set birthday to 10 seconds from now for testing
+    const birthday = new Date("2025-07-04T00:00:00+05:00");
+    let balloonsStarted = false;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = birthday - now;
+
+      if (diff <= 0) {
+        headingEl.textContent = "🎉 Happy Birthday, My Love! 🎉";
+        countdownEl.innerHTML = "🎈 It's Your Special Day! 🎈";
+        if (!balloonsStarted) startCelebration();
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / 1000 / 60) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      countdownEl.innerHTML = `
+        <span>${days}d</span> : 
+        <span>${hours}h</span> : 
+        <span>${minutes}m</span> : 
+        <span>${seconds}s</span>
+      `;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    function startCelebration() {
+      balloonsStarted = true;
+
+      // Balloons
+      setInterval(() => {
+        const balloon = document.createElement("div");
+        balloon.className = "balloon";
+        balloon.style.left = `${Math.random() * 100}%`;
+        balloon.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 75%)`;
+        balloon.style.animationDuration = `${4 + Math.random() * 3}s`;
+        document.body.appendChild(balloon);
+        setTimeout(() => balloon.remove(), 7000);
+      }, 500);
+
+      // Fireworks
+      let particles = [];
+
+      function createFirework() {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height / 2;
+        for (let i = 0; i < 50; i++) {
+          particles.push({
+            x, y,
+            dx: (Math.random() - 0.5) * 4,
+            dy: (Math.random() - 0.5) * 4,
+            life: 100,
+            color: `hsl(${Math.random() * 360}, 100%, 70%)`
+          });
+        }
+      }
+
+      function animateFireworks() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p, i) => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+          p.x += p.dx;
+          p.y += p.dy;
+          p.life--;
+          if (p.life <= 0) particles.splice(i, 1);
+        });
+        requestAnimationFrame(animateFireworks);
+      }
+
+      setInterval(createFirework, 1000);
+      animateFireworks();
+    }
+  </script>
+</body>
+</html>
